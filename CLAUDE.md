@@ -75,6 +75,17 @@ corepack yarn build       # CJS (dist/index.js) + ESM (dist/esm/index.mjs) + dec
   vendored checksums, the official 2.0 example documents against the official 2.0 schema, two pinned
   verdicts of that schema on operations the 2.0 text forbids, and the package boundary: the library in
   `src` (not its `__tests__`) refers to no module outside `src`.
+- **Official documents** (`e2e/official-documents.e2e.ts`): every OAI test document vendored under
+  `e2e/fixtures/oas/documents`. Each PASS document validates against its official schema, type-checks as
+  an `OAS20.SwaggerObject` / `OAS3x.OpenAPIObject` literal (`x-` keys removed), is read by
+  `detectSpecVersion` as supported with no diagnostic, and `listOperations` (with
+  `resolveOperationLayout`) finds exactly its pinned operations, in order, ignoring nothing
+  (`e2e/expected/official-operations.json`, `<method> <path>`, written from the documents: derived from
+  mcp-from-openapi's pinned tools, never from this package's output). A single-file 2.0 document
+  converts (`upgradeSwagger2`) into one the official 3.0 schema accepts, with no 2.0-only root field and
+  its input unchanged; the multi-file `petstore-separate` is not converted (no dereferencer here). Each
+  FAIL document is rejected by the schema and read by every function without a throw. `KNOWN_GAPS`
+  lists what does not hold yet; each entry is asserted to still fail exactly as listed, so it only shrinks.
 - **Type tests** (`e2e/types/*.types.ts`, see its README): the public types as a consumer sees them,
   importing `openapi-spec`; compiled by `yarn typecheck`, never run. `rejections`, `swagger2` and the end of
   `extensions` hold code that must NOT compile, each marked `// @ts-expect-error` with exactly one reason
