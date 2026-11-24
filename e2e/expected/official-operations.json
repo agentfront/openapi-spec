@@ -1,0 +1,164 @@
+{
+  "$comment": [
+    "The operations each official PASS document declares under `paths`, as `<method> <path>`: paths sorted, then each path item in the order listOperations promises (the fixed methods in STANDARD_METHODS order, then additionalOperations by key).",
+    "A document with no entry declares none. Derived from mcp-from-openapi e2e/expected/official-documents.json (the method and path of each pinned tool), which is written from the documents and the specification, not from a library run."
+  ],
+  "2.0": {
+    "api-with-examples": [
+      "get /",
+      "get /v2"
+    ],
+    "petstore": [
+      "get /pets",
+      "post /pets",
+      "get /pets/{petId}"
+    ],
+    "petstore-expanded": [
+      "get /pets",
+      "post /pets",
+      "get /pets/{id}",
+      "delete /pets/{id}"
+    ],
+    "petstore-minimal": [
+      "get /pets"
+    ],
+    "petstore-separate": [
+      "get /pets",
+      "post /pets",
+      "get /pets/{id}",
+      "delete /pets/{id}"
+    ],
+    "petstore-simple": [
+      "get /pets",
+      "post /pets",
+      "get /pets/{id}",
+      "delete /pets/{id}"
+    ],
+    "petstore-with-external-docs": [
+      "get /pets",
+      "post /pets",
+      "get /pets/{id}",
+      "delete /pets/{id}"
+    ],
+    "uber": [
+      "get /estimates/price",
+      "get /estimates/time",
+      "get /history",
+      "get /me",
+      "get /products"
+    ]
+  },
+  "3.0": {
+    "api-with-examples": [
+      "get /",
+      "get /v2"
+    ],
+    "callback-example": [
+      "post /streams"
+    ],
+    "link-example": [
+      "get /2.0/repositories/{username}",
+      "get /2.0/repositories/{username}/{slug}",
+      "get /2.0/repositories/{username}/{slug}/pullrequests",
+      "get /2.0/repositories/{username}/{slug}/pullrequests/{pid}",
+      "post /2.0/repositories/{username}/{slug}/pullrequests/{pid}/merge",
+      "get /2.0/users/{username}"
+    ],
+    "petstore-expanded": [
+      "get /pets",
+      "post /pets",
+      "get /pets/{id}",
+      "delete /pets/{id}"
+    ],
+    "petstore": [
+      "get /pets",
+      "post /pets",
+      "get /pets/{petId}"
+    ],
+    "uspto": [
+      "get /",
+      "get /{dataset}/{version}/fields",
+      "post /{dataset}/{version}/records"
+    ]
+  },
+  "3.1": {
+    "link-object-examples": [
+      "get /users/{id}",
+      "get /users/{userid}/address"
+    ],
+    "media-type-examples": [
+      "put /something"
+    ],
+    "mega": [
+      "get /"
+    ],
+    "non-oauth-scopes": [
+      "get /users"
+    ],
+    "operation-object-example": [
+      "put /pets/{id}"
+    ],
+    "path-item-object-example": [
+      "get /pets/{id}"
+    ],
+    "path_item_servers_parameters": [
+      "get /things",
+      "post /things",
+      "patch /things",
+      "delete /things",
+      "head /things",
+      "options /things",
+      "trace /things"
+    ],
+    "path_no_response": [
+      "get /"
+    ],
+    "paths-object-example": [
+      "get /pets"
+    ],
+    "request-body-examples": [
+      "put /something"
+    ]
+  },
+  "3.2": {
+    "link-object-examples": [
+      "get /users/{id}",
+      "get /users/{userid}/address"
+    ],
+    "media-type-examples": [
+      "put /something"
+    ],
+    "mega": [
+      "get /"
+    ],
+    "non-oauth-scopes": [
+      "get /users"
+    ],
+    "operation-object-example": [
+      "put /pets/{id}"
+    ],
+    "path-item-object-example": [
+      "get /pets/{id}",
+      "query /pets/{id}",
+      "COPY /pets/{id}"
+    ],
+    "path_item_servers_parameters": [
+      "get /things",
+      "post /things",
+      "patch /things",
+      "delete /things",
+      "head /things",
+      "options /things",
+      "trace /things"
+    ],
+    "path_no_response": [
+      "get /"
+    ],
+    "paths-object-example": [
+      "get /pets"
+    ],
+    "request-body-examples": [
+      "put /something"
+    ]
+  }
+}
