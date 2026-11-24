@@ -3,6 +3,7 @@
  * iterating a document, free-form values. All of it must keep compiling.
  * Compiled by `yarn typecheck`, never executed (see README.md).
  */
+import { isReferenceObject } from 'openapi-spec';
 import type {
   ExampleObject,
   OpenAPIDocument,
@@ -20,12 +21,6 @@ import type {
 type Expect<T extends true> = T;
 type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
 type Extends<A, B> = [A] extends [B] ? true : false;
-
-/**
- * A consumer's own Reference Object guard. `openapi-spec` exports none, so the
- * cases below narrow with one the consumer writes, typed as such guards are.
- */
-declare function isReferenceObject(value: any): value is ReferenceObject;
 
 // ---------------------------------------------------------------------------
 // Narrowing a parameter or reference

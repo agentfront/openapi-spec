@@ -123,9 +123,9 @@ The patch number never matters: a document is read by the rules of its declared 
 
 | Area | Exports | What it does |
 | --- | --- | --- |
-| **Types** | `OAS20`, `OAS30`, `OAS31`, `OAS32`, `OpenAPIDocument`, `OperationObject`, `ParameterObject`, `SchemaObject`, `SchemaOrBoolean`, `WithExtensions`, ... | Reader types for every version and the cross-version unions |
+| **Types** | `OAS20`, `OAS30`, `OAS31`, `OAS32`, `OpenAPIDocument`, `OperationObject`, `ParameterObject`, `SchemaObject`, `SchemaOrBoolean`, `WithExtensions`, `isReferenceObject`, ... | Reader types for every version and the cross-version unions; `isReferenceObject` narrows `X \| ReferenceObject` (an own `$ref` that is a string) |
 | **Versions** | `detectSpecVersion`, `isSwagger2`, `SPEC_PROFILES`, `getSpecProfile`, `SPEC_FEATURES`, `isFeatureAvailable`, `featureNewerThanDeclared`, `SUPPORTED_SPEC_VERSIONS`, `LATEST_SPEC_FAMILY` | What a document declares, and what each version allows: methods, parameter locations, required fields, which version introduced a feature |
-| **Operations** | `listOperations`, `getOperation`, `resolveOperationLayout`, `STANDARD_METHODS`, `isHttpToken`, `wireMethod` | The one walker of a Path Item: fixed methods in a stable order, then `additionalOperations`, with a diagnostic for every value it ignores |
+| **Operations** | `listOperations`, `getOperation`, `resolveOperationLayout`, `STANDARD_METHODS`, `StandardMethod`, `HTTPMethod`, `isHttpToken`, `wireMethod` | The one walker of a Path Item: fixed methods in a stable order, then `additionalOperations`, with a diagnostic for every value it ignores. `HTTPMethod` is open: the nine standard methods autocomplete, an `additionalOperations` token (`LINK`) type-checks |
 | **Swagger 2.0** | `upgradeSwagger2`, `readSwagger2BasePath`, `UPGRADED_OPENAPI_VERSION`, `MAX_CONVERSION_ENTRIES` | Total, pure and bounded conversion to OpenAPI 3.0.3 |
 | **Schema references** | `wrapReferenceSiblings` | In 3.1+, a `$ref` with sibling constraints moves into `allOf` before dereferencing, which would otherwise drop the siblings |
 | **Diagnostics** | `SPEC_DIAGNOSTIC_CODES`, `SpecDiagnostic`, `jsonPointer`, `appendPointer`, `describeValue` | Stable codes, JSON Pointer paths, and document text made safe to print |

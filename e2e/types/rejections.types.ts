@@ -6,6 +6,7 @@
  */
 import { isStandardMethod } from 'openapi-spec';
 import type {
+  HTTPMethod,
   OAS30,
   OAS31,
   OAS32,
@@ -266,6 +267,48 @@ export const nullable32: OAS32.SchemaObject = { type: 'string', nullable: true }
 // ---------------------------------------------------------------------------
 // HTTP methods
 // ---------------------------------------------------------------------------
+
+// @ts-expect-error a method is a string: a status code is not one
+export const numberMethod: HTTPMethod = 405;
+
+/**
+ * `Record<HTTPMethod, T>` takes the standard methods as required keys, nine of them: a literal
+ * with the eight methods before OpenAPI 3.2 (all but `query`) does not compile
+ * (a literal with all nine, and any further key, does: see methods.types.ts).
+ */
+// @ts-expect-error property `query` is missing: the standard methods are nine, with `query` from OpenAPI 3.2
+export const eightMethods: Record<HTTPMethod, string> = {
+  get: 'Read',
+  post: 'Create',
+  put: 'Replace',
+  patch: 'Update',
+  delete: 'Remove',
+  head: 'Headers',
+  options: 'Capabilities',
+  trace: 'Echo',
+};
+
+/**
+ * A switch over the eight methods before OpenAPI 3.2, with no default, is not exhaustive: the type
+ * also holds `query` and any other string, so the function can fall off its end.
+ */
+// @ts-expect-error function lacks an ending return statement: add a `default` branch
+export function eightMethodSwitch(method: HTTPMethod): string {
+  switch (method) {
+    case 'get':
+      return 'Read';
+    case 'post':
+    case 'put':
+    case 'patch':
+      return 'Write';
+    case 'delete':
+      return 'Remove';
+    case 'head':
+    case 'options':
+    case 'trace':
+      return 'Meta';
+  }
+}
 
 /**
  * `isStandardMethod` returns a boolean, not a type guard (it ignores case, so `GET` is a standard

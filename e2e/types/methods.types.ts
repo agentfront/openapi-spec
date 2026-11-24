@@ -17,6 +17,7 @@ import {
   resolveOperationLayout,
 } from 'openapi-spec';
 import type {
+  HTTPMethod,
   OpenAPIDocument,
   OperationLayout,
   OperationList,
@@ -33,6 +34,65 @@ type Expect<T extends true> = T;
 type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
 
 declare const openApiDocument: OpenAPIDocument;
+
+// ---------------------------------------------------------------------------
+// HTTPMethod: the nine standard methods and any other token
+// ---------------------------------------------------------------------------
+
+export const getMethod: HTTPMethod = 'get';
+export const postMethod: HTTPMethod = 'post';
+export const putMethod: HTTPMethod = 'put';
+export const patchMethod: HTTPMethod = 'patch';
+export const deleteMethod: HTTPMethod = 'delete';
+export const headMethod: HTTPMethod = 'head';
+export const optionsMethod: HTTPMethod = 'options';
+export const traceMethod: HTTPMethod = 'trace';
+/** OpenAPI 3.2 `query`, a field of the Path Item Object. */
+export const queryMethod: HTTPMethod = 'query';
+/** An OpenAPI 3.2 `additionalOperations` key, as written: any HTTP token. */
+export const linkMethod: HTTPMethod = 'LINK';
+export const purgeMethod: HTTPMethod = 'PURGE';
+
+/** A plain `string` is accepted too, as a method read from a document at runtime is. */
+declare const runtimeMethod: string;
+export const methodFromString: HTTPMethod = runtimeMethod;
+
+/** An operation's method, whatever its source, is an `HTTPMethod`. */
+export const listedMethods: HTTPMethod[] = listOperations({}).operations.map(({ method }) => method);
+
+/** A switch over the method needs a `default`: the type is open. */
+export function accessOf(method: HTTPMethod): 'read' | 'write' | 'other' {
+  switch (method) {
+    case 'get':
+    case 'head':
+    case 'options':
+    case 'query':
+      return 'read';
+    case 'post':
+    case 'put':
+    case 'patch':
+    case 'delete':
+      return 'write';
+    default:
+      return 'other';
+  }
+}
+
+/** A `Record<HTTPMethod, T>` takes the nine standard keys, and any other key as well. */
+export const methodLabels: Record<HTTPMethod, string> = {
+  get: 'Read',
+  post: 'Create',
+  put: 'Replace',
+  patch: 'Update',
+  delete: 'Remove',
+  head: 'Headers',
+  options: 'Capabilities',
+  trace: 'Echo',
+  query: 'Query',
+  LINK: 'Link',
+};
+
+export const purgeLabel: string = methodLabels['PURGE'];
 
 // ---------------------------------------------------------------------------
 // isStandardMethod is a boolean, not a type guard: it ignores case (`GET` is

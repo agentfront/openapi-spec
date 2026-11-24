@@ -7,6 +7,7 @@
  */
 import type {
   ExampleObject,
+  HTTPMethod,
   MAX_CONVERSION_ENTRIES,
   MAX_MEDIA_TYPES_PER_LIST,
   MediaTypeObject,
@@ -316,6 +317,13 @@ export type MethodTypes = [
   Expect<
     Equal<StandardMethod, 'get' | 'post' | 'put' | 'patch' | 'delete' | 'head' | 'options' | 'trace' | 'query'>
   >,
+  Expect<Extends<StandardMethod, HTTPMethod>>,
+  Expect<Extends<'LINK', HTTPMethod>>,
+  Expect<Extends<string, HTTPMethod>>,
+  Expect<Extends<HTTPMethod, string>>,
+  Expect<Not<Extends<number, HTTPMethod>>>,
+  // open, but not a plain `string`: the standard methods still autocomplete
+  Expect<Not<Equal<HTTPMethod, string>>>,
 ];
 
 /** The families are four, Swagger 2.0 among them, each declared by one version member. */
