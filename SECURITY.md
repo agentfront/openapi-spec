@@ -7,7 +7,8 @@ trust. Security reports are taken seriously and handled with priority.
 
 | Version | Supported |
 | ------- | --------- |
-| 0.x     | ✅        |
+| 1.x     | ✅ (from 1.0.0, the first release) |
+| 0.0.1   | ❌ (name placeholder, exports nothing) |
 
 ## Reporting a vulnerability
 

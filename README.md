@@ -19,7 +19,7 @@
 ---
 
 > [!IMPORTANT]
-> **Early release.** `openapi-spec@0.0.1` reserves the name and exports nothing yet. The API on this page is being extracted from [mcp-from-openapi](https://github.com/agentfront/mcp-from-openapi), where it is developed and tested, and ships in **0.1.0**. Watch the repository (*Watch → Custom → Releases*) to hear when it lands.
+> **Early release.** `openapi-spec@0.0.1` reserves the name and exports nothing yet. The API on this page is being extracted from [mcp-from-openapi](https://github.com/agentfront/mcp-from-openapi), where it is developed and tested, and ships as **1.0.0**, the first stable release. Watch the repository (*Watch → Custom → Releases*) to hear when it lands.
 
 `openapi-spec` is the OpenAPI specification layer for TypeScript and JavaScript tools: **types for every OpenAPI version**, **version detection**, **one walker for the operations of a path item**, and a **Swagger 2.0 to OpenAPI 3.0 converter**. It's built for API tooling: code generators, linters, gateways, documentation sites, SDK builders and AI agents that read OpenAPI documents.
 
@@ -46,7 +46,7 @@ pnpm add openapi-spec
 
 ## Quick start
 
-> The examples below are the **0.1.0** API.
+> The examples below are the **1.0.0** API.
 
 ### Type an OpenAPI document
 
@@ -141,7 +141,7 @@ Every source it's held to is vendored and pinned by sha256 in [`e2e/fixtures/oas
 ## Roadmap
 
 - [x] **0.0.1**: name reserved, repository, CI, release pipeline (npm trusted publishing with provenance), weekly spec watch
-- [ ] **0.1.0**: types, version profiles, the operation walker and the Swagger 2.0 converter, extracted from mcp-from-openapi with their tests: schema-to-types parity and the official OAI documents
+- [ ] **1.0.0**: types, version profiles, the operation walker and the Swagger 2.0 converter, extracted from mcp-from-openapi with their tests: schema-to-types parity and the official OAI documents
 - [ ] [mcp-from-openapi](https://github.com/agentfront/mcp-from-openapi) depends on `openapi-spec`
 - [ ] OpenAPI 3.3 as soon as the OpenAPI Initiative publishes it
 
@@ -157,7 +157,7 @@ Dereference the document, then call `upgradeSwagger2(document)`. You get an Open
 
 ### Does it validate documents or resolve `$ref`?
 
-Not in 0.1.0. The package reads, detects and converts. Use a dereferencer such as [`@apidevtools/json-schema-ref-parser`](https://www.npmjs.com/package/@apidevtools/json-schema-ref-parser) first. For validation, generation and loading with SSRF protection, see [mcp-from-openapi](https://github.com/agentfront/mcp-from-openapi).
+Not in 1.0.0. The package reads, detects and converts. Use a dereferencer such as [`@apidevtools/json-schema-ref-parser`](https://www.npmjs.com/package/@apidevtools/json-schema-ref-parser) first. For validation, generation and loading with SSRF protection, see [mcp-from-openapi](https://github.com/agentfront/mcp-from-openapi).
 
 ### Why are the types "reader types"?
 

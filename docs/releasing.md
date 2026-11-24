@@ -29,7 +29,7 @@ release/X.Y.x ──(1) Prepare Release──▶ pull request release-pr/vX.Y.Z 
 
 The npm dist-tag follows the version: `latest` for `X.Y.Z`, `rc` for `X.Y.Z-rc.N`, `beta` for `X.Y.Z-beta.N`. A tag never moves back to an older version: when it already names a newer one (a patch of an older release line, or a run approved after a later one), the version is published with its line's tag instead, such as `latest-2.8`, and when that one does too, with its own, such as `latest-2.8.3`.
 
-`0.0.1` was published by hand to claim the name on npm (npm configures a trusted publisher only for a package that exists); every later version goes through this flow.
+`0.0.1` was published by hand to claim the name on npm (npm configures a trusted publisher only for a package that exists); every later version goes through this flow. The first release is `1.0.0`: run **Create release branch** with major `1` and minor `0` (it makes `release/1.0.x` at `1.0.0`), then **Prepare Release** from that branch.
 
 A new release line starts with **Create release branch** (`create-release-branch.yml`), which makes `release/X.Y.x` from `main` at version `X.Y.0`. The first Prepare Release on it releases `X.Y.0`.
 
