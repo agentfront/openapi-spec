@@ -13,9 +13,18 @@ updates:
       - "dependencies"
 
   - package-ecosystem: "github-actions"
-    directory: "/"
+    # "/" reads .github/workflows; composite actions are found only by their own directory
+    directories:
+      - "/"
+      - "/.github/actions/*"
     schedule:
       interval: "weekly"
       day: "monday"
+    # One pull request per directory: steps of one action (codeql-action init and analyze)
+    # must move together, or CodeQL refuses to run
+    groups:
+      github-actions:
+        patterns:
+          - "*"
     labels:
       - "dependencies"
