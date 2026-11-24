@@ -1,6 +1,6 @@
 {
   "name": "openapi-spec",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Up-to-date TypeScript types and readers for Swagger 2.0 and OpenAPI 3.0, 3.1 and 3.2",
   "author": "AgentFront <info@agentfront.dev>",
   "license": "Apache-2.0",
