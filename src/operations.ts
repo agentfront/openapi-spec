@@ -18,7 +18,7 @@
  */
 
 import { SPEC_DIAGNOSTIC_CODES, appendPointer, describeValue, type SpecDiagnostic } from './diagnostics';
-import type { OperationObject } from './types';
+import type { OperationObject, ReferenceObject } from './types';
 
 /**
  * Whether `value` is a non-null, non-array object, the only shape a spec
@@ -26,6 +26,15 @@ import type { OperationObject } from './types';
  */
 export function isSpecObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Whether `value` is a Reference Object: an object whose own `$ref` is a
+ * string. A `$ref` of any other type refers to nothing, so the object is read
+ * as what it otherwise is; an inherited `$ref` is not the document's.
+ */
+export function isReferenceObject(value: unknown): value is ReferenceObject {
+  return isSpecObject(value) && typeof ownProperty(value, '$ref') === 'string';
 }
 
 /**
@@ -74,6 +83,21 @@ export const STANDARD_METHODS = Object.freeze([
 
 /** A method with a fixed Path Item field. */
 export type StandardMethod = (typeof STANDARD_METHODS)[number];
+
+/**
+ * The HTTP method of an operation.
+ *
+ * - A method with a fixed Path Item field (`get`, `post`, `put`, `patch`,
+ *   `delete`, `head`, `options`, `trace`, and `query` from OpenAPI 3.2) is
+ *   the lowercase field name.
+ * - An OpenAPI 3.2 `additionalOperations` method (`LINK`, `PURGE`, ...) is the
+ *   key exactly as written: HTTP methods are case-sensitive, and it is sent
+ *   as written.
+ *
+ * The type is open (`(string & {})`) so additional methods type-check while
+ * the standard ones still autocomplete. `isStandardMethod` tells them apart.
+ */
+export type HTTPMethod = StandardMethod | (string & {});
 
 /**
  * Methods that are never an API operation, in upper case (compared

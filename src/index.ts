@@ -32,6 +32,7 @@ export {
   STANDARD_METHODS,
   getOperation,
   isHttpToken,
+  isReferenceObject,
   isRefusedMethod,
   isSpecObject,
   isStandardMethod,
@@ -43,6 +44,7 @@ export {
 } from './operations';
 export type {
   GetOperationOptions,
+  HTTPMethod,
   ListOperationsOptions,
   OperationEntry,
   OperationLayout,

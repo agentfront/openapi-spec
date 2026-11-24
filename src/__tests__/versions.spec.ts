@@ -960,6 +960,7 @@ describe('the spec barrel', () => {
       'STANDARD_METHODS',
       'getOperation',
       'isHttpToken',
+      'isReferenceObject',
       'isRefusedMethod',
       'isSpecObject',
       'isStandardMethod',
