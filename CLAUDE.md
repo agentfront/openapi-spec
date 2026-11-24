@@ -7,8 +7,8 @@ OpenAPI 3.0, 3.1 and 3.2, version detection and profiles, the operation walker, 
 Swagger 2.0 to OpenAPI 3.0 converter. It was extracted from the `src/spec/` layer of
 [mcp-from-openapi](https://github.com/agentfront/mcp-from-openapi), which will depend on it.
 
-Status: `0.0.1` on npm reserves the name and exports nothing. The code on `main` ships as `1.0.0`,
-the first functional release (release line `release/1.0.x`).
+Status: `1.0.0` is the first functional release (release line `release/1.0.x`); `0.0.1` only
+reserved the npm name and exports nothing.
 
 ## Key Files
 
