@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "..",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "types": ["jest", "node"],
+    "baseUrl": "..",
+    "paths": { "openapi-spec": ["src/index.ts"] }
+  },
+  "include": ["./**/*.ts"]
+}

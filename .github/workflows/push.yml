@@ -44,7 +44,7 @@ jobs:
       - name: Build
         run: yarn build
 
-      - name: Type-check
+      - name: Type-check (src without Node types, unit tests, e2e stories and type tests)
         run: yarn typecheck
 
       - name: Test with coverage
@@ -53,6 +53,10 @@ jobs:
       # Offline: every vendored file under e2e/fixtures/oas/ matches its sha256 and none is unlisted
       - name: Verify the pinned OpenAPI sources
         run: yarn verify:sources
+
+      # The types against the official OpenAPI JSON Schemas, field by field (no network)
+      - name: E2E stories
+        run: yarn test:e2e
 
       - name: Coverage summary
         if: always()
