@@ -21,7 +21,8 @@ Useful commands:
 | -------------------- | ------------------------------------- |
 | `yarn test`          | Run the tests                         |
 | `yarn test:coverage` | Tests with the enforced coverage gate |
-| `yarn typecheck`     | Type-check `src`                      |
+| `yarn typecheck`     | Type-check `src` (no Node types), the unit tests, the e2e stories and the type tests |
+| `yarn test:e2e`      | E2E stories: the types against the official OpenAPI JSON Schemas, field by field |
 | `yarn build`         | Build CJS + ESM + type declarations   |
 | `yarn verify:sources` | Check the pinned official OpenAPI sources against their checksums (offline) |
 

@@ -48,8 +48,10 @@ A `schema-iteration` finding names the manifest entry (`id`), the pinned date, t
 
 1. In `e2e/fixtures/oas/sources.json` change the date in the entry's `url` (keep its `path` unless the layout changed). `schema` and `schema-base` usually move together; `dialect` and `meta` rarely, and their dates differ from the schema's.
 2. `node scripts/sync-oas-sources.mjs --update` and read the diff of the vendored file (`git diff e2e/fixtures/oas/`): that diff is the change in the specification you are about to absorb.
-3. `corepack yarn verify:sources`, `corepack yarn typecheck`, `corepack yarn test:coverage`.
-4. Update the date and "retrieved" columns in the tables of `e2e/fixtures/README.md`.
+3. Run what the new schema can break, in this order:
+   - `corepack yarn test:e2e spec-types-parity`: a field the new schema added or removed, a changed required-ness or value kind, a new `$defs` entry that no type is mapped to. Fix `src/types/` (and the profile in `src/versions.ts` if a rule changed), or record a deviation in the version's allowlist with its reason.
+   - `corepack yarn verify:sources`, `corepack yarn typecheck`, `corepack yarn test:coverage`.
+4. Update the date and "retrieved" columns in the tables of `e2e/fixtures/README.md`, and `kindCoverage` in the parity story if the count of compared fields changed.
 
 A `documents-changed` finding is the same for the test documents: set the new full commit in the `url` of every entry of that version and kind **and** in the row of `upstream.documents` (the verification fails until both agree), add the entries of new files and drop those of deleted ones (the snippet in [`e2e/fixtures/README.md`](../e2e/fixtures/README.md#openapi-initiative-test-documents) lists a folder at a commit), run `--update`, and update the counts in `e2e/fixtures/README.md`.
 
@@ -60,7 +62,10 @@ A `release-tag`, `unpinned-version` or `dev-branch` finding for a minor version 
 1. In `e2e/fixtures/oas/sources.json` add the four schema entries (`oas-3.3-schema`, `oas-3.3-schema-base`, `oas-3.3-dialect`, `oas-3.3-meta`: `version: "3.3"`, `url: https://spec.openapis.org/oas/3.3/<kind>/<date>` with the dates from the index, `path: schemas/3.3/<kind>.json`). The dialect and meta dates differ from the schema's.
 2. Add the test documents: generate the entries for `tests/schema/pass` and `tests/schema/fail` at a full commit of `v3.3-dev` with the snippet in `e2e/fixtures/README.md` (`documents/3.3/{pass,fail}/<name>.yaml`, ids `oas-3.3-doc-<pass|fail>-<name>`), and add the row to `upstream.documents`: `{ "commit": "<sha>", "version": "3.3", "ref": "v3.3-dev", "folders": ["tests/schema/pass", "tests/schema/fail"] }`. If the version has been published, pin the release's commit rather than the branch head.
 3. `node scripts/sync-oas-sources.mjs --update`, then `git diff e2e/fixtures/oas/` and read it: the new files and checksums are the only change. Run `corepack yarn verify:sources` afterwards.
-4. Record the pins in the tables of `e2e/fixtures/README.md` and check `e2e/fixtures/NOTICES.md` (the OAI sources are Apache-2.0 and vendored unmodified, so no licence text is reproduced).
+4. Record the pins in the tables of `e2e/fixtures/README.md` and check `e2e/fixtures/NOTICES.md` (the OAI sources are Apache-2.0 and vendored unmodified, so no licence text is reproduced). Let the validation helper know the version: widen `OasVersion` in `e2e/helpers/oas-validate.ts`.
+5. **Add the types module.** Create `src/types/v3_3.ts` the way `v3_2.ts` extends `v3_1.ts`: every object is the 3.2 object unchanged (`export type InfoObject = OAS32.InfoObject`) or `Override<OAS32.X, { ...changes }>`, and an object also changes when an object it holds changes. Write it from the specification text and the new schema, cite both in the header, and keep the reader-type rules of `src/types/index.ts`. Register it in `src/types/index.ts` (`export type * as OAS33` and `| OAS33.X` in every cross-version union).
+6. **Register the version** in `src/versions.ts`: the family in `SpecFamily` and `SPEC_FAMILIES`, `LATEST_SPEC_FAMILY`, a `SPEC_PROFILES` entry (every value with the schema pointer it comes from) and each new construct in the features table with `since: '3.3'`. A new operation field also goes in `STANDARD_METHODS` (`src/operations.ts`). Update the unit tests that pin the lists (`src/__tests__/versions.spec.ts`, `operations.spec.ts`) and keep the coverage gate.
+7. **Extend the parity story**: add the version's `VersionCase` in `e2e/spec-types-parity.e2e.ts` next to the 3.2 one and run `corepack yarn test:e2e spec-types-parity`. Each failure names the version, the schema definition, the type and the exact fields.
 
 A `dev-branch` finding is an early notice; once you have decided it needs no action yet, add its name to `upstream.acknowledgedBranches` in the manifest so the weekly run stops reporting it (it is still found through the index and the tags when the version is published).
 

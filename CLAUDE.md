@@ -63,6 +63,23 @@ corepack yarn build       # CJS (dist/index.js) + ESM (dist/esm/index.mjs) + dec
 - Jest 30 with `@swc/jest`, V8 coverage, 100% threshold on statements, branches, functions, lines.
 - Unit tests in `src/__tests__/*.spec.ts`, inline documents only. SWC strips types without checking
   them, so `yarn typecheck` compiles the tests too (`tsconfig.test.json`).
+- E2E stories: `e2e/*.e2e.ts` under `jest.e2e.config.js` (`yarn test:e2e`, a CI step; never under
+  coverage). The bare specifier `openapi-spec` maps onto `src/index.ts` (`moduleNameMapper` and the
+  `paths` of `e2e/tsconfig.json`).
+- **Schema-to-types parity** (`e2e/spec-types-parity.e2e.ts`, helpers `e2e/helpers/oas-schema.ts`,
+  `oas-validate.ts`, `tsc.ts`): `OAS20`/`OAS30`/`OAS31`/`OAS32` declare exactly the fields of the
+  official OAI JSON Schemas (required-ness, value kinds, maps, `x-` keys in maps); every schema definition
+  is mapped to a type or listed as unmapped with a reason; every exported object type rejects a string,
+  a number, a boolean and an array (`primitiveAccepts`, compiled with the real compiler). A deviation
+  needs a per-version allowlist entry with its reason, and a stale entry fails. It also checks the
+  vendored checksums, the official 2.0 example documents against the official 2.0 schema, two pinned
+  verdicts of that schema on operations the 2.0 text forbids, and the package boundary: the library in
+  `src` (not its `__tests__`) refers to no module outside `src`.
+- **Type tests** (`e2e/types/*.types.ts`, see its README): the public types as a consumer sees them,
+  importing `openapi-spec`; compiled by `yarn typecheck`, never run. `rejections`, `swagger2` and the end of
+  `extensions` hold code that must NOT compile, each marked `// @ts-expect-error` with exactly one reason
+  to fail (an unused directive is itself an error); `shapes` states required keys and field types as
+  `Expect<Equal<...>>` assertions.
 
 ## Pinned OpenAPI Sources and Spec Watch
 
