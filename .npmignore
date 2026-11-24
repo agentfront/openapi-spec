@@ -1,0 +1,47 @@
+# The package is published FROM dist/ (`npm publish ./dist`, see docs/releasing.md), which holds
+# only the build, package.json, README.md and LICENSE. These rules guard an accidental publish
+# of the repository root: it must never carry sources, tests, fixtures, tooling or credentials.
+
+# Credentials and local environment
+.npmrc
+.env
+.env.*
+
+# Sources and tests
+src/
+e2e/
+*.ts
+!*.d.ts
+__tests__/
+*.spec.ts
+*.test.ts
+coverage/
+
+# Tooling and configuration
+scripts/
+docs/
+.github/
+.yarn/
+.claude/
+tsconfig*.json
+jest.config.js
+.eslintrc*
+.prettierrc*
+.nvmrc
+.yarnrc.yml
+yarn.lock
+*.tgz
+
+# Repository documents (README.md and LICENSE ship)
+CLAUDE.md
+CONTRIBUTING.md
+CODE_OF_CONDUCT.md
+SECURITY.md
+
+# Git, IDE, OS
+.git/
+.gitignore
+.idea/
+.vscode/
+*.log
+.DS_Store

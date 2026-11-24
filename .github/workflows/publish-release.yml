@@ -1,0 +1,262 @@
+name: Publish Release
+
+# Publishes the release a merged release pull request (prepare-release.yml) describes. Every push to a
+# release/X.Y.x branch runs `detect`; only the merge of the open release-pr/v<package.json version>
+# pull request goes further. npm is reached through OIDC trusted publishing: no npm token exists.
+# The file name and the `release` environment are part of the npm trusted publisher configuration.
+# No concurrency group: GitHub keeps one pending run per group and cancels it for the next push, which
+# would drop a release waiting behind another run. Every job is safe to run twice (npm, tag and release
+# are checked first), so runs are never cancelled.
+
+on:
+  push:
+    branches:
+      - "release/*.*.x"
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    name: Find the merged release pull request
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      release: ${{ steps.release.outputs.release }}
+      version: ${{ steps.release.outputs.version }}
+      npm_tag: ${{ steps.release.outputs.npm_tag }}
+      prerelease: ${{ steps.release.outputs.prerelease }}
+      pr_number: ${{ steps.release.outputs.pr_number }}
+      node_version: ${{ steps.release.outputs.node_version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Find the release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          VERSION=$(node -p "require('./package.json').version")
+          export VERSION BRANCH
+
+          # Only the merge of this repository's release-pr/v<version> pull request into this branch releases
+          PR_NUMBER=$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/pulls" --jq '[.[]
+            | select(.merged_at != null and .base.ref == env.BRANCH and .head.ref == "release-pr/v" + env.VERSION
+              and .head.repo.full_name == env.GITHUB_REPOSITORY)][0].number // empty')
+          if [ -z "$PR_NUMBER" ]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "Not the merge of the release pull request of v$VERSION: nothing to publish"
+            exit 0
+          fi
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v$VERSION" >/dev/null 2>&1; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::v$VERSION is tagged already: nothing to publish"
+            exit 0
+          fi
+
+          NPM_TAG="latest"
+          if [[ "$VERSION" == *-rc.* ]]; then NPM_TAG="rc"; elif [[ "$VERSION" == *-beta.* ]]; then NPM_TAG="beta"; fi
+          PRERELEASE="false"
+          if [[ "$VERSION" == *-* ]]; then PRERELEASE="true"; fi
+
+          {
+            echo "release=true"
+            echo "version=$VERSION"
+            echo "npm_tag=$NPM_TAG"
+            echo "prerelease=$PRERELEASE"
+            echo "pr_number=$PR_NUMBER"
+            echo "node_version=$(cat .nvmrc)"
+          } >> "$GITHUB_OUTPUT"
+          echo "Releasing v$VERSION (npm tag $NPM_TAG) from #$PR_NUMBER"
+
+  build:
+    name: Test, build and pack
+    needs: detect
+    if: ${{ needs.detect.outputs.release == 'true' }}
+    runs-on: ubuntu-latest
+    # Installs and runs the dependencies: it can neither publish nor write
+    permissions:
+      contents: read
+    env:
+      VERSION: ${{ needs.detect.outputs.version }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node + Yarn
+        uses: ./.github/actions/setup-node-yarn
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Typecheck and test
+        run: |
+          yarn typecheck
+          yarn test
+
+      - name: Build and pack
+        run: |
+          set -euo pipefail
+          yarn build
+          PACKED=$(node -p "require('./dist/package.json').version")
+          if [ "$PACKED" != "$VERSION" ]; then
+            echo "::error::dist/package.json says $PACKED, the release is $VERSION"
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/package"
+          npm pack ./dist --ignore-scripts --pack-destination "$RUNNER_TEMP/package"
+
+      - name: Keep the package for the publish job
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: package
+          path: ${{ runner.temp }}/package/*.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish to npm
+    needs: [detect, build]
+    runs-on: ubuntu-latest
+    environment: release
+    # The OIDC token is the npm credential. No checkout, no install, no build: the job publishes the
+    # tarball the build job packed and runs nothing else
+    permissions:
+      id-token: write
+    env:
+      VERSION: ${{ needs.detect.outputs.version }}
+      NPM_TAG: ${{ needs.detect.outputs.npm_tag }}
+    outputs:
+      npm_tag: ${{ steps.publish.outputs.npm_tag }}
+
+    steps:
+      - name: Get the package
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: package
+          path: ${{ runner.temp }}/package
+
+      - name: Setup Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: ${{ needs.detect.outputs.node_version }}
+          registry-url: "https://registry.npmjs.org/"
+
+      # Pinned: this job can publish, so no unpinned code runs in it
+      - name: Update npm CLI for trusted publishing
+        run: npm install -g npm@12.2.3
+
+      - name: Publish
+        id: publish
+        env:
+          # Exits 0 when the first version is not older than the second, by semver precedence
+          NOT_OLDER: |
+            const parse = (version) => {
+              const text = version.split('+')[0];
+              const dash = text.indexOf('-');
+              const core = (dash === -1 ? text : text.slice(0, dash)).split('.').map(Number);
+              return { core, pre: dash === -1 ? [] : text.slice(dash + 1).split('.') };
+            };
+            const numeric = (id) => /^\d+$/.test(id);
+            const compareIds = (a, b) => {
+              if (numeric(a) && numeric(b)) return Number(a) - Number(b);
+              if (numeric(a) !== numeric(b)) return numeric(a) ? -1 : 1;
+              return a < b ? -1 : a > b ? 1 : 0;
+            };
+            const compare = (a, b) => {
+              for (let i = 0; i < 3; i++) if (a.core[i] !== b.core[i]) return a.core[i] - b.core[i];
+              if (a.pre.length === 0 || b.pre.length === 0) return b.pre.length - a.pre.length;
+              for (let i = 0; i < Math.min(a.pre.length, b.pre.length); i++) {
+                const order = compareIds(a.pre[i], b.pre[i]);
+                if (order !== 0) return order;
+              }
+              return a.pre.length - b.pre.length;
+            };
+            const [candidate, current] = process.argv.slice(1).map(parse);
+            process.exit(compare(candidate, current) >= 0 ? 0 : 1);
+          # The version a dist-tag names, read by its exact name (`npm view dist-tags.latest-2.8` splits at the dots)
+          TAG_OF: |
+            const tags = JSON.parse(process.argv[1]);
+            const name = process.argv[2];
+            process.stdout.write(Object.hasOwn(tags, name) ? String(tags[name]) : '');
+        run: |
+          set -euo pipefail
+          # A rerun after a later job failed finds the version published already
+          if npm view "openapi-spec@$VERSION" version >/dev/null 2>&1; then
+            echo "::notice::openapi-spec@$VERSION is on npm already"
+            exit 0
+          fi
+          # A tag never moves back: the first of the type's, the line's and the version's own tag that names
+          # nothing newer (an older release line, or a run approved after a later one, takes a later one)
+          # Read once; a failed request stops the step rather than reading as a tag that is not there
+          TAGS=$(npm view openapi-spec dist-tags --json)
+          for TAG in "$NPM_TAG" "$NPM_TAG-$(echo "$VERSION" | cut -d. -f1,2)" "$NPM_TAG-$VERSION"; do
+            CURRENT=$(node -e "$TAG_OF" "$TAGS" "$TAG")
+            if [ -z "$CURRENT" ] || node -e "$NOT_OLDER" "$VERSION" "$CURRENT"; then break; fi
+            echo "::notice::$TAG names $CURRENT, newer than $VERSION"
+          done
+          npm publish "$RUNNER_TEMP"/package/*.tgz --access public --tag "$TAG" --provenance --ignore-scripts
+          echo "npm_tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Published openapi-spec@$VERSION with tag $TAG"
+
+  release:
+    name: Tag and create the GitHub release
+    needs: [detect, publish]
+    runs-on: ubuntu-latest
+    # Creates the tag and the release; reads the merged pull request for the notes
+    permissions:
+      contents: write
+      pull-requests: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ needs.detect.outputs.version }}
+      PR_NUMBER: ${{ needs.detect.outputs.pr_number }}
+      PRERELEASE: ${{ needs.detect.outputs.prerelease }}
+
+    steps:
+      - name: Create the release from the pull request
+        run: |
+          set -euo pipefail
+          TAG="v$VERSION"
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::notice::The release $TAG exists already"
+            exit 0
+          fi
+
+          # The pull request as merged: its description is the notes, its title the release name
+          gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json body --jq .body > "$RUNNER_TEMP/notes.md"
+          TITLE=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json title --jq .title)
+          NAME="${TITLE#'chore(release): '}"
+
+          FLAGS=()
+          if [ "$PRERELEASE" = "true" ]; then FLAGS+=(--prerelease); fi
+          # Tags the merge commit the package was built from
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "$NAME" --notes-file "$RUNNER_TEMP/notes.md" "${FLAGS[@]}"
+
+      - name: Summary
+        env:
+          # The tag the publish used; none when the version was on npm before this run
+          NPM_TAG: ${{ needs.publish.outputs.npm_tag || 'none (published before this run)' }}
+        run: |
+          {
+            echo "## Released v$VERSION"
+            echo ""
+            echo "| Property | Value |"
+            echo "|----------|-------|"
+            echo "| Version | \`$VERSION\` |"
+            echo "| npm tag | \`$NPM_TAG\` |"
+            echo "| Pre-release | $PRERELEASE |"
+            echo "| Pull request | #$PR_NUMBER |"
+            echo "| Commit | \`$GITHUB_SHA\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
