@@ -3,7 +3,9 @@
     "target": "es2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "lib": ["es2022"],
+    "lib": [
+      "es2022"
+    ],
     "strict": true,
     "strictNullChecks": true,
     "esModuleInterop": true,
@@ -17,8 +19,17 @@
     "declaration": true,
     "sourceMap": true,
     "rootDir": "src",
-    "outDir": "dist"
+    "outDir": "dist",
+    "types": []
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts", "**/__tests__/**"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/__tests__/**"
+  ]
 }
