@@ -34,6 +34,8 @@ module.exports = {
   coverageDirectory: 'coverage',
   collectCoverageFrom: [
     'src/**/*.ts',
+    // Types only: the OpenAPI object types, never loaded at runtime
+    '!src/types/**',
     '!src/**/*.spec.ts',
     '!src/**/*.test.ts',
     '!src/**/__tests__/**',

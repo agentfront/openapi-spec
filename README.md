@@ -19,7 +19,7 @@
 ---
 
 > [!IMPORTANT]
-> **Early release.** `openapi-spec@0.0.1` reserves the name and exports nothing yet. The API on this page is being extracted from [mcp-from-openapi](https://github.com/agentfront/mcp-from-openapi), where it is developed and tested, and ships as **1.0.0**, the first stable release. Watch the repository (*Watch → Custom → Releases*) to hear when it lands.
+> **Early release.** `openapi-spec@0.0.1` on npm reserves the name and exports nothing yet. The API on this page, extracted from [mcp-from-openapi](https://github.com/agentfront/mcp-from-openapi), is on `main` and ships as **1.0.0**, the first stable release. Watch the repository (*Watch → Custom → Releases*) to hear when it lands.
 
 `openapi-spec` is the OpenAPI specification layer for TypeScript and JavaScript tools: **types for every OpenAPI version**, **version detection**, **one walker for the operations of a path item**, and a **Swagger 2.0 to OpenAPI 3.0 converter**. It's built for API tooling: code generators, linters, gateways, documentation sites, SDK builders and AI agents that read OpenAPI documents.
 
