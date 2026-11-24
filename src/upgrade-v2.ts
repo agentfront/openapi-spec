@@ -67,6 +67,7 @@ import {
   type SpecDiagnostic,
   type SpecDiagnosticSeverity,
 } from './diagnostics';
+import { findingKind } from './finding-kind';
 import { isSpecObject, listOperations, ownProperty, setOwnProperty, type OperationEntry } from './operations';
 import { parameterNameNotStringDiagnostic, readParameterName } from './parameters';
 import type { OAS30 } from './types';
@@ -388,15 +389,6 @@ const LISTED_PLACE_MAX_LENGTH = 256;
 
 /** Thrown inside the converter when the conversion passes `MAX_CONVERSION_ENTRIES`; never escapes it. */
 const TOO_LARGE: unique symbol = Symbol('too large');
-
-/**
- * The kind of a finding, from its message: every quoted value (as
- * `describeValue` writes it) and every number replaced, so findings that
- * differ only in the value they quote are one kind.
- */
-function findingKind(message: string): string {
-  return message.replace(/"(?:[^"\\]|\\.)*"/g, '"…"').replace(/[0-9]+/g, '#');
-}
 
 /** Most trailing segments a diagnostic pointer keeps; deeper ones start with `POINTER_TRUNCATION_MARKER`. */
 const MAX_TRAIL_SEGMENTS = 32;
