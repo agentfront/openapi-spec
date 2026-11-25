@@ -137,7 +137,7 @@ Every source it's held to is vendored and pinned by sha256 in [`e2e/fixtures/oas
 
 - [x] **0.0.1**: name reserved, repository, CI, release pipeline (npm trusted publishing with provenance), weekly spec watch
 - [x] **1.0.0**: types, version profiles, the operation walker and the Swagger 2.0 converter, extracted from mcp-from-openapi with their tests: schema-to-types parity and the official OAI documents
-- [ ] [mcp-from-openapi](https://github.com/agentfront/mcp-from-openapi) depends on `openapi-spec`
+- [x] [mcp-from-openapi](https://github.com/agentfront/mcp-from-openapi) depends on `openapi-spec` (from 2.11.0): its OpenAPI types, version rules and Swagger 2.0 converter come from here
 - [ ] OpenAPI 3.3 as soon as the OpenAPI Initiative publishes it
 
 ## FAQ
