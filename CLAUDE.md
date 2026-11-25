@@ -56,6 +56,9 @@ corepack yarn build       # CJS (dist/index.js) + ESM (dist/esm/index.mjs) + dec
 - Releases: `docs/releasing.md`. Prepare Release opens `release-pr/vX.Y.Z` into `release/X.Y.x`;
   merging it runs Publish Release (`publish-release.yml`, environment `release`, npm trusted publishing:
   the file name and environment are part of the npm configuration, never rename them). No npm token.
+  Release pull requests write the `CHANGELOG.md` entry on the release branch only: `changelog-sync.yml`
+  (Changelog to main) runs from `main` after each Publish Release run and opens the pull request
+  `changelog/sync` adding the entry of every stable tag `main` lacks (`scripts/sync-changelog.mjs`).
 - Never commit `.npmrc`, `.env*` or packed `*.tgz` (all git-ignored); the repository is public.
 
 ## Testing
